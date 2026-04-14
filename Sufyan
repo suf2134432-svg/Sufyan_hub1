@@ -1,0 +1,105 @@
+import { useState } from "react"; import { Card, CardContent } from "@/components/ui/card"; import { Input } from "@/components/ui/input"; import { Button } from "@/components/ui/button";
+
+export default function AcademicSearchPlatform() { const [query, setQuery] = useState(""); const [results, setResults] = useState([]); const [saved, setSaved] = useState([]); const [plan, setPlan] = useState(""); const [loading, setLoading] = useState(false);
+
+const searchPapers = async () => { setLoading(true); const res = await fetch(https://api.semanticscholar.org/graph/v1/paper/search?query=${query}&limit=10&fields=title,authors,year,abstract,url); const data = await res.json(); setResults(data.data || []); setLoading(false); };
+
+const savePaper = (paper) => { setSaved([...saved, paper]); };
+
+const generatePlan = () => { const generated = ` عنوان البحث: ${query}
+
+مشكلة البحث: دراسة وتحليل موضوع "${query}" وتأثيره في المجال.
+
+أهداف البحث:
+
+فهم الموضوع بشكل علمي
+
+تحليل الدراسات السابقة
+
+تقديم نتائج وتوصيات
+
+
+خطة البحث:
+
+1. مقدمة
+
+
+2. الإطار النظري
+
+
+3. الدراسات السابقة
+
+
+4. المنهجية
+
+
+5. النتائج
+
+
+6. التوصيات `; setPlan(generated); };
+
+
+
+return ( <div className="min-h-screen bg-gray-100 p-6"> <div className="max-w-5xl mx-auto"> <h1 className="text-3xl font-bold text-center mb-6">🎓 منصة الباحث الذكي</h1>
+
+<div className="bg-white p-4 rounded-2xl shadow mb-6">
+      <div className="flex gap-2">
+        <Input
+          placeholder="اكتب موضوع البحث..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <Button onClick={searchPapers}>بحث</Button>
+        <Button onClick={generatePlan}>توليد خطة</Button>
+      </div>
+    </div>
+
+    {loading && <p className="text-center">⏳ جاري البحث...</p>}
+
+    {plan && (
+      <Card className="mb-6">
+        <CardContent className="p-4 whitespace-pre-line">
+          <h2 className="font-bold mb-2">📘 خطة البحث المقترحة</h2>
+          {plan}
+        </CardContent>
+      </Card>
+    )}
+
+    <div className="grid gap-4">
+      {results.map((paper, index) => (
+        <Card key={index}>
+          <CardContent className="p-4">
+            <h2 className="text-lg font-semibold">{paper.title}</h2>
+            <p className="text-sm text-gray-500">
+              {paper.authors.map(a => a.name).join(", ")} ({paper.year})
+            </p>
+
+            <p className="mt-2 text-sm">
+              {paper.abstract ? paper.abstract.substring(0, 200) + "..." : "لا يوجد ملخص"}
+            </p>
+
+            <div className="flex gap-4 mt-3">
+              <a href={paper.url} target="_blank" className="text-blue-600">قراءة</a>
+              <button onClick={() => savePaper(paper)} className="text-green-600">حفظ</button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+
+    {saved.length > 0 && (
+      <div className="mt-10">
+        <h2 className="text-xl font-bold mb-3">⭐ الأبحاث المحفوظة</h2>
+        {saved.map((paper, i) => (
+          <p key={i} className="text-sm">• {paper.title}</p>
+        ))}
+      </div>
+    )}
+
+    <footer className="text-center text-sm text-gray-500 mt-10">
+      © 2026 منصة الباحث الذكي
+    </footer>
+  </div>
+</div>
+
+); }
